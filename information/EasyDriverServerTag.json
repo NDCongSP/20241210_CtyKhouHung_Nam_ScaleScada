@@ -1,0 +1,285 @@
+{
+  "ProjectPath": "D:\\MyCompany\\8.SourceCode\\3.Projects\\20241210_CtyKhouHung_Nam_ScaleScada\\information\\EasyDriverServerTag.json",
+  "Username": null,
+  "Password": null,
+  "ParameterContainer": null,
+  "Childs": [
+    {
+  "Name": "Local Station",
+  "Description": null,
+  "ItemType": "LocalStation",
+  "IsReadOnly": true,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:26:30.7071104+07:00",
+  "ModifiedDate": "2024-12-14T04:28:10.2284188+07:00",
+  "ParameterContainer": {
+  "DisplayName": null,
+  "DisplayParameters": null,
+  "Parameters": {}
+},
+  "CommunicationMode": "ReceiveFromServer",
+  "StationType": "Local",
+  "RemoteAddress": null,
+  "Port": 0,
+  "ConnectionString": null,
+  "RefreshRate": 0,
+  "Childs": [
+    {
+  "Name": "Channel1",
+  "Description": null,
+  "ItemType": "Channel",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:26:38.3605266+07:00",
+  "ModifiedDate": "2024-12-14T04:28:10.2284188+07:00",
+  "ParameterContainer": {
+  "DisplayName": null,
+  "DisplayParameters": null,
+  "Parameters": {}
+},
+  "DriverPath": "S7Ethernet",
+  "Childs": [
+    {
+  "Name": "Device1",
+  "Description": null,
+  "ItemType": "Device",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:26:45.9797621+07:00",
+  "ModifiedDate": "2024-12-14T04:29:37.3827103+07:00",
+  "ParameterContainer": {
+  "DisplayName": "S7Ethernet Device Parameter",
+  "DisplayParameters": "S7Ethernet Device Parameter",
+  "Parameters": {
+    "IpAddress": "192.168.1.100",
+    "Timeout": "1000",
+    "TryReadWriteTimes": "3",
+    "DelayBetweenPool": "10",
+    "Port": "102",
+    "ScanRate": "1000",
+    "Rack": "0",
+    "Slot": "1"
+  }
+},
+  "ByteOrder": "ABCD",
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": [
+    {
+  "Name": "CHECK_CONNECT",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:27:54.9539514+07:00",
+  "ModifiedDate": "2024-12-14T04:27:54.9539514+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "DB4.DBW4",
+    "AddressType": "Datablock",
+    "ByteOffset": "4",
+    "BitOffset": "0",
+    "IsValid": "True",
+    "IsBitAddress": "False",
+    "DBNumber": "4"
+  }
+},
+  "Address": "DB4.DBW4",
+  "DataTypeName": "Word",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+},
+    {
+  "Name": "WEIGHT",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:28:08.6851885+07:00",
+  "ModifiedDate": "2024-12-14T04:28:08.6851885+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "DB4.DBW0",
+    "AddressType": "Datablock",
+    "ByteOffset": "0",
+    "BitOffset": "0",
+    "IsValid": "True",
+    "IsBitAddress": "False",
+    "DBNumber": "4"
+  }
+},
+  "Address": "DB4.DBW0",
+  "DataTypeName": "Word",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+},
+    {
+  "Name": "COUNT",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:28:23.7090953+07:00",
+  "ModifiedDate": "2024-12-14T04:28:23.7090953+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "DB4.DBW2",
+    "AddressType": "Datablock",
+    "ByteOffset": "2",
+    "BitOffset": "0",
+    "IsValid": "True",
+    "IsBitAddress": "False",
+    "DBNumber": "4"
+  }
+},
+  "Address": "DB4.DBW2",
+  "DataTypeName": "Word",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+},
+    {
+  "Name": "TRIGGER",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:28:42.7051381+07:00",
+  "ModifiedDate": "2024-12-14T04:28:42.7051381+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "I0.2",
+    "AddressType": "Input",
+    "ByteOffset": "0",
+    "BitOffset": "2",
+    "IsValid": "True",
+    "IsBitAddress": "True",
+    "DBNumber": "0"
+  }
+},
+  "Address": "I0.2",
+  "DataTypeName": "Bool",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+},
+    {
+  "Name": "SAVE_DONE",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:28:58.9807998+07:00",
+  "ModifiedDate": "2024-12-14T04:28:58.9807998+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "M0.0",
+    "AddressType": "Marker",
+    "ByteOffset": "0",
+    "BitOffset": "0",
+    "IsValid": "True",
+    "IsBitAddress": "True",
+    "DBNumber": "0"
+  }
+},
+  "Address": "M0.0",
+  "DataTypeName": "Bool",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+},
+    {
+  "Name": "CODE",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-14T04:29:33.3897791+07:00",
+  "ModifiedDate": "2024-12-14T04:29:33.3897791+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "DB5.DBW18",
+    "AddressType": "Datablock",
+    "ByteOffset": "18",
+    "BitOffset": "0",
+    "IsValid": "True",
+    "IsBitAddress": "False",
+    "DBNumber": "5"
+  }
+},
+  "Address": "DB5.DBW18",
+  "DataTypeName": "String",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+}
+  ]
+}
+  ]
+}
+  ]
+}
+  ]
+}
