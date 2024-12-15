@@ -41,13 +41,14 @@
             this.label5 = new System.Windows.Forms.Label();
             this._txtAttachmentPath = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this._ckServer = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // _btnSave
             // 
             this._btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
             this._btnSave.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._btnSave.Location = new System.Drawing.Point(755, 405);
+            this._btnSave.Location = new System.Drawing.Point(755, 477);
             this._btnSave.Name = "_btnSave";
             this._btnSave.Size = new System.Drawing.Size(258, 69);
             this._btnSave.TabIndex = 36;
@@ -165,12 +166,24 @@
             this.label6.Text = "ĐƯỜNG DẪN ĐẾN FILE EXCEL BÁO CÁO ĐÍNH KÈM GỬI EMAIL";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // _ckServer
+            // 
+            this._ckServer.AutoSize = true;
+            this._ckServer.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._ckServer.Location = new System.Drawing.Point(51, 410);
+            this._ckServer.Name = "_ckServer";
+            this._ckServer.Size = new System.Drawing.Size(199, 32);
+            this._ckServer.TabIndex = 48;
+            this._ckServer.Text = "MÁY TÍNH TẠI TỦ";
+            this._ckServer.UseVisualStyleBackColor = true;
+            // 
             // SettingsPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.Controls.Add(this._ckServer);
             this.Controls.Add(this._txtAttachmentPath);
             this.Controls.Add(this.label6);
             this.Controls.Add(this._txtEmailSubject);
@@ -187,7 +200,7 @@
             this.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "SettingsPanel";
-            this.Size = new System.Drawing.Size(1048, 489);
+            this.Size = new System.Drawing.Size(1048, 580);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -208,5 +221,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox _txtAttachmentPath;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox _ckServer;
     }
 }

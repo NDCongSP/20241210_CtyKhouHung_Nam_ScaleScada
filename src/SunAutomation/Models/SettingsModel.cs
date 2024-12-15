@@ -9,6 +9,11 @@ namespace SunAutomation
     public class SettingsModel
     {
         /// <summary>
+        /// True: là server cho log data.
+        /// False: client- không cho log data.
+        /// </summary>
+        public bool IsServer { get; set; } = true;
+        /// <summary>
         /// Danh sách các email nhận báo cáo tự động.
         /// nhiều email, thì cách nhau bởi dấu ,.
         /// </summary>

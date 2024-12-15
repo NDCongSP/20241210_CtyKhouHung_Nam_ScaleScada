@@ -29,6 +29,7 @@ namespace SunAutomation.Controls
                     _txtPassEmailTo.Text = GlobalVariable.SettingConfig.SenderPassword;
                     _txtEmailSubject.Text = GlobalVariable.SettingConfig.EmailSubject;
                     _txtAttachmentPath.Text = GlobalVariable.SettingConfig.AttachmentPath;
+                    _ckServer.Checked = GlobalVariable.SettingConfig.IsServer;
                 }
             }
             catch { }
@@ -46,12 +47,21 @@ namespace SunAutomation.Controls
                     GlobalVariable.SettingConfig.SenderPassword = _txtPassEmailTo.Text;
                     GlobalVariable.SettingConfig.EmailSubject = _txtEmailSubject.Text;
                     GlobalVariable.SettingConfig.AttachmentPath = _txtAttachmentPath.Text;
+                    GlobalVariable.SettingConfig.IsServer = _ckServer.Checked;
 
                     GlobalVariable.MyConfig.ConfingModel = JsonConvert.SerializeObject(GlobalVariable.SettingConfig);
 
                     dbContext.ConfigSettings.AddOrUpdate(GlobalVariable.MyConfig);
                     dbContext.SaveChanges();
 
+                    var data = dbContext.ConfigSettings.ToList();
+
+                    if (data != null && data.Count > 0)
+                    {
+                        GlobalVariable.MyConfig = data.FirstOrDefault();
+
+                        GlobalVariable.SettingConfig = JsonConvert.DeserializeObject<SettingsModel>(GlobalVariable.MyConfig.ConfingModel);
+                    }
                     MessageBox.Show("Lưu thành công.", "THÔNG BÁO", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }

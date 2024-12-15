@@ -35,13 +35,15 @@
             this._dtTo = new System.Windows.Forms.DateTimePicker();
             this._btnSendMail = new System.Windows.Forms.Button();
             this._btnQuery = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this._cbCode = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this._grData)).BeginInit();
             this.SuspendLayout();
             // 
             // _grData
             // 
             this._grData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._grData.Location = new System.Drawing.Point(36, 105);
+            this._grData.Location = new System.Drawing.Point(36, 113);
             this._grData.Name = "_grData";
             this._grData.Size = new System.Drawing.Size(776, 465);
             this._grData.TabIndex = 28;
@@ -108,12 +110,33 @@
             this._btnQuery.Text = "TRUY VẤN";
             this._btnQuery.UseVisualStyleBackColor = false;
             // 
+            // label3
+            // 
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(31, 64);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(124, 35);
+            this.label3.TabIndex = 36;
+            this.label3.Text = "MÃ HÀNG";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // _cbCode
+            // 
+            this._cbCode.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this._cbCode.FormattingEnabled = true;
+            this._cbCode.Location = new System.Drawing.Point(161, 64);
+            this._cbCode.Name = "_cbCode";
+            this._cbCode.Size = new System.Drawing.Size(248, 36);
+            this._cbCode.TabIndex = 37;
+            // 
             // MonitorPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.Controls.Add(this._cbCode);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this._btnQuery);
             this.Controls.Add(this._btnSendMail);
             this.Controls.Add(this.label2);
@@ -138,5 +161,7 @@
         private System.Windows.Forms.DateTimePicker _dtTo;
         private System.Windows.Forms.Button _btnSendMail;
         private System.Windows.Forms.Button _btnQuery;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox _cbCode;
     }
 }

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -21,6 +22,7 @@ namespace SunAutomation.Controls
         DateTime _fromDate, _toDate;
         Email _email;
         string _fileName = string.Empty;
+        string _code = string.Empty;
 
         public MonitorPanel()
         {
@@ -43,9 +45,25 @@ namespace SunAutomation.Controls
 
                 _dtFrom.ValueChanged += (s, o) => { _fromDate = _dtFrom.Value; };
                 _dtTo.ValueChanged += (s, o) => { _toDate = _dtTo.Value; };
+                _cbCode.SelectedValueChanged += (s, o) => { _code = _cbCode.Text; };
 
                 _dtFrom.Value = DateTime.Now;
                 _dtTo.Value = DateTime.Now;
+
+                using (var dbContext = new ApplicationDbContext())
+                {
+                    var d = dbContext.DataLogs.ToList();
+
+                    if (d != null && d.Count > 0)
+                    {
+                        _cbCode.Items.Add("All");
+                        foreach (var item in d)
+                        {
+                            _cbCode.Items.Add(item.Code);
+                        }
+                        _cbCode.SelectedItem = "All";
+                    }
+                }
             }
             catch { }
         }
@@ -54,7 +72,7 @@ namespace SunAutomation.Controls
         {
             try
             {
-                GlobalVariable.EmailCenter.Body = $"Dữ liệu cân từ ngày {_fromDate} đến ngày {_toDate}";
+                GlobalVariable.EmailCenter.Body = $"Dữ liệu cân từ ngày {_fromDate} đến ngày {_toDate}.  Mã hàng: {_code}";
 
                 var result = GlobalVariable.EmailCenter.SendEmail();
                 var mess = result == true ? "thành công" : "không thành công";
@@ -81,7 +99,17 @@ namespace SunAutomation.Controls
                     _fromDate = Convert.ToDateTime(fromDate);
                     _toDate = Convert.ToDateTime(todateDate);
 
-                    var data = dbContext.DataLogs.Where(x => x.CreatedDate >= _fromDate && x.CreatedDate <= _toDate).OrderByDescending(_ => _.CreatedDate).ToList();
+                    List<DataLog> data = new List<DataLog>();
+                    if (_code != "All")
+                    {
+                        data = dbContext.DataLogs.Where(x => x.Code == _code && x.CreatedDate >= _fromDate && x.CreatedDate <= _toDate)
+                            .OrderByDescending(_ => _.CreatedDate).ToList();
+                    }
+                    else data = dbContext.DataLogs.Where(x => x.CreatedDate >= _fromDate && x.CreatedDate <= _toDate)
+                            .OrderByDescending(_ => _.CreatedDate).ToList();
+
+                    //var data = dbContext.DataLogs.Where(x => x.Code == _code && x.CreatedDate >= _fromDate && x.CreatedDate <= _toDate)
+                    //        .OrderByDescending(_ => _.CreatedDate).ToList();
 
                     if (data != null && data.Count > 0)
                     {
@@ -119,23 +147,27 @@ namespace SunAutomation.Controls
                    .Font.SetFontSize(15).Font.SetBold(true);
                     worksheet.Range(2, 1, 2, 5).Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
                   .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
-                   .Font.SetFontSize(12).Font.SetBold(true); ;
+                   .Font.SetFontSize(12).Font.SetBold(true);
+                    worksheet.Range(3, 1, 3, 5).Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                 .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                  .Font.SetFontSize(12).Font.SetBold(true); ;
 
                     worksheet.Cell(1, 1).Value = "BÁO CÁO";
                     worksheet.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.Orange;
-                    worksheet.Cell(2, 1).Value = $"Thời gian:{_fromDate} - {_toDate}";
+                    worksheet.Cell(2, 1).Value = $"Thời gian: {_fromDate} - {_toDate}";
+                    worksheet.Cell(3, 1).Value = $"Mã hàng: {_code}";
 
                     // Thêm tiêu đề cột
-                    worksheet.Cell(4, 1).Value = "Ngày giờ cân";
-                    worksheet.Cell(4, 2).Value = "Code";
-                    worksheet.Cell(4, 3).Value = "Bộ đếm";
-                    worksheet.Cell(4, 4).Value = "Khối lượng (kg)";
-                    worksheet.Cell(4, 5).Value = "Tổng khối lượng (kg)";
+                    worksheet.Cell(5, 1).Value = "Ngày giờ cân";
+                    worksheet.Cell(5, 2).Value = "Mã Hàng";
+                    worksheet.Cell(5, 3).Value = "Bộ đếm";
+                    worksheet.Cell(5, 4).Value = "Khối lượng (kg)";
+                    worksheet.Cell(5, 5).Value = "Tổng khối lượng (kg)";
                     //tieu de columns
-                    worksheet.Range(4, 1, 4, 5).SetAutoFilter(true);
-                    worksheet.Range(4, 1, 4, 5).Style.Fill.BackgroundColor = XLColor.LightCyan;
+                    worksheet.Range(5, 1, 5, 5).SetAutoFilter(true);
+                    worksheet.Range(5, 1, 5, 5).Style.Fill.BackgroundColor = XLColor.LightCyan;
                     // Định dạng bảng (nếu cần)
-                    worksheet.Range($"A4:E{model.Count + 4}").Style.Border.SetInsideBorder(XLBorderStyleValues.Thin)
+                    worksheet.Range($"A5:E{model.Count + 5}").Style.Border.SetInsideBorder(XLBorderStyleValues.Thin)
                                           .Border.SetOutsideBorder(XLBorderStyleValues.Thin);
 
 
@@ -143,30 +175,30 @@ namespace SunAutomation.Controls
                     for (int i = 0; i < model.Count; i++)
                     {
                         var data = model[i];
-                        worksheet.Cell(i + 5, 1).Value = data.CreatedDate;
-                        worksheet.Cell(i + 5, 2).Value = data.Code;
-                        worksheet.Cell(i + 5, 3).Value = data.Count;
-                        worksheet.Cell(i + 5, 4).Value = data.Weight;
-                        worksheet.Cell(i + 5, 5).Value = data.TotalWeight;
+                        worksheet.Cell(i + 6, 1).Value = data.CreatedDate;
+                        worksheet.Cell(i + 6, 2).Value = data.Code;
+                        worksheet.Cell(i + 6, 3).Value = data.Count;
+                        worksheet.Cell(i + 6, 4).Value = data.Weight;
+                        worksheet.Cell(i + 6, 5).Value = data.TotalWeight;
                     }
 
                     //worksheet.Column(1).Width = 40;  // Set cột 1 có độ rộng 15
                     worksheet.Columns().AdjustToContents();//Adjust Row Height and Column Width to Contents
 
                     //column name
-                    worksheet.Range($"A4:E4").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                    worksheet.Range($"A5:E5").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
                    .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
                     .Font.SetFontSize(12).Font.SetBold(true); ;
 
                     //Data row.
-                    worksheet.Range($"A5:A{model.Count + 4}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left)
+                    worksheet.Range($"A6:A{model.Count + 5}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left)
                  .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
                  .DateFormat.Format = "yyyy-MM-dd HH:mm:ss";
 
-                    worksheet.Range($"B5:B{model.Count + 4}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left)
+                    worksheet.Range($"B6:B{model.Count + 5}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left)
                  .Alignment.SetVertical(XLAlignmentVerticalValues.Center);
 
-                    worksheet.Range($"C5:E{model.Count + 4}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right)
+                    worksheet.Range($"C6:E{model.Count + 5}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right)
                 .Alignment.SetVertical(XLAlignmentVerticalValues.Center);
 
                     // Lưu file Excel

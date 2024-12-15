@@ -22,6 +22,9 @@ namespace SunAutomation
 
         Control _activePanel;
 
+        DateTime _startTime, _endTime;
+        int _countConnect = 0;
+
         bool _trigger = false;
         DataLog _dataLog = new DataLog();
 
@@ -47,6 +50,8 @@ namespace SunAutomation
             {
                 _easyDriverConnector_Started(null, null);
             }
+
+            _startTime = DateTime.Now;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -55,6 +60,14 @@ namespace SunAutomation
             try
             {
                 RefreshDateTime();
+
+                var totalTime = (DateTime.Now - _startTime).TotalSeconds;
+                if (totalTime > GlobalVariable.SettingConfig.CheckConnectInterval)
+                {
+                    _countConnect = _countConnect <= 1000 ? _countConnect += 1 : 1;
+                    _easyDriverConnector.GetTag("Local Station/Channel1/Device1/CHECK_CONNECT").WriteAsync(_countConnect.ToString(), WritePiority.High);
+                    _startTime = DateTime.Now;
+                }
             }
             catch { }
             finally
@@ -103,7 +116,8 @@ namespace SunAutomation
 
                 if (_labTotalWeight.InvokeRequired)
                 {
-                    _labTotalWeight.Invoke(new Action(() => {
+                    _labTotalWeight.Invoke(new Action(() =>
+                    {
                         _labTotalWeight.Text = _dataLog.TotalWeight.ToString();
                     }));
                 }
@@ -120,7 +134,8 @@ namespace SunAutomation
 
                 if (_labCount.InvokeRequired)
                 {
-                    _labCount.Invoke(new Action(() => {
+                    _labCount.Invoke(new Action(() =>
+                    {
                         _labCount.Text = _dataLog.Count.ToString();
                     }));
                 }
@@ -137,7 +152,8 @@ namespace SunAutomation
 
                 if (_labWeight.InvokeRequired)
                 {
-                    _labWeight.Invoke(new Action(() => {
+                    _labWeight.Invoke(new Action(() =>
+                    {
                         _labWeight.Text = _dataLog.Weight.ToString();
                     }));
                 }
@@ -150,6 +166,9 @@ namespace SunAutomation
         {
             try
             {
+                //nếu app được mở ở máy client thì không thực hiện log data.
+                if (!GlobalVariable.SettingConfig.IsServer) return;
+
                 _trigger = e.NewValue == "1" ? true : false;
 
                 if (_trigger)
@@ -174,9 +193,10 @@ namespace SunAutomation
             {
                 _dataLog.Code = e.NewValue;
 
-                  if (_labCode.InvokeRequired)
+                if (_labCode.InvokeRequired)
                 {
-                    _labCode.Invoke(new Action(() => {
+                    _labCode.Invoke(new Action(() =>
+                    {
                         _labCode.Text = _dataLog.Code.ToString();
                     }));
                 }
@@ -223,6 +243,7 @@ namespace SunAutomation
 
         private void _btnMonitor_Click(object sender, EventArgs e)
         {
+            _monitorPanel = new MonitorPanel();
             ShowPanel(_monitorPanel);
         }
 
@@ -237,6 +258,7 @@ namespace SunAutomation
 
         private void _btnSetup_Click(object sender, EventArgs e)
         {
+            _setingsPanel = new SettingsPanel();
             ShowPanel(_setingsPanel);
         }
 
