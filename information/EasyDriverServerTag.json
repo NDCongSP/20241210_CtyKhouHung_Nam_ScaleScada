@@ -46,7 +46,7 @@
   "IsReadOnly": false,
   "Enabled": true,
   "CreatedDate": "2024-12-14T04:26:45.9797621+07:00",
-  "ModifiedDate": "2024-12-14T04:29:37.3827103+07:00",
+  "ModifiedDate": "2024-12-15T09:26:29.9580148+07:00",
   "ParameterContainer": {
   "DisplayName": "S7Ethernet Device Parameter",
   "DisplayParameters": "S7Ethernet Device Parameter",
@@ -83,7 +83,9 @@
     "BitOffset": "0",
     "IsValid": "True",
     "IsBitAddress": "False",
-    "DBNumber": "4"
+    "DBNumber": "4",
+    "DataType": "Word",
+    "Address": "DB4.DBW4"
   }
 },
   "Address": "DB4.DBW4",
@@ -118,7 +120,9 @@
     "BitOffset": "0",
     "IsValid": "True",
     "IsBitAddress": "False",
-    "DBNumber": "4"
+    "DBNumber": "4",
+    "DataType": "Word",
+    "Address": "DB4.DBW0"
   }
 },
   "Address": "DB4.DBW0",
@@ -153,7 +157,9 @@
     "BitOffset": "0",
     "IsValid": "True",
     "IsBitAddress": "False",
-    "DBNumber": "4"
+    "DBNumber": "4",
+    "DataType": "Word",
+    "Address": "DB4.DBW2"
   }
 },
   "Address": "DB4.DBW2",
@@ -188,7 +194,9 @@
     "BitOffset": "2",
     "IsValid": "True",
     "IsBitAddress": "True",
-    "DBNumber": "0"
+    "DBNumber": "0",
+    "DataType": "Bool",
+    "Address": "I0.2"
   }
 },
   "Address": "I0.2",
@@ -223,7 +231,9 @@
     "BitOffset": "0",
     "IsValid": "True",
     "IsBitAddress": "True",
-    "DBNumber": "0"
+    "DBNumber": "0",
+    "DataType": "Bool",
+    "Address": "M0.0"
   }
 },
   "Address": "M0.0",
@@ -258,11 +268,50 @@
     "BitOffset": "0",
     "IsValid": "True",
     "IsBitAddress": "False",
-    "DBNumber": "5"
+    "DBNumber": "5",
+    "DataType": "String",
+    "Address": "DB5.DBW18"
   }
 },
   "Address": "DB5.DBW18",
   "DataTypeName": "String",
+  "RefreshRate": 100,
+  "ByteOrder": 0,
+  "AccessPermission": "ReadAndWrite",
+  "Offset": 0.0,
+  "Gain": 1.0,
+  "IsInternalTag": false,
+  "GUID": null,
+  "Retain": false,
+  "Childs": [],
+  "HaveTags": true,
+  "Tags": []
+},
+    {
+  "Name": "TOTAL_WEIGHT",
+  "Description": null,
+  "ItemType": "Tag",
+  "IsReadOnly": false,
+  "Enabled": true,
+  "CreatedDate": "2024-12-15T09:24:48.7172466+07:00",
+  "ModifiedDate": "2024-12-15T09:24:48.7172466+07:00",
+  "ParameterContainer": {
+  "DisplayName": "Tag Parameters",
+  "DisplayParameters": "Tag Parameters",
+  "Parameters": {
+    "LastAddress": "DB4.DBW6",
+    "AddressType": "Datablock",
+    "ByteOffset": "6",
+    "BitOffset": "0",
+    "IsValid": "True",
+    "IsBitAddress": "False",
+    "DBNumber": "4",
+    "DataType": "Word",
+    "Address": "DB4.DBW6"
+  }
+},
+  "Address": "DB4.DBW6",
+  "DataTypeName": "Word",
   "RefreshRate": 100,
   "ByteOrder": 0,
   "AccessPermission": "ReadAndWrite",

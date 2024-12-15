@@ -1,10 +1,14 @@
-﻿using EasyScada.Core;
+﻿using ClosedXML.Excel;
+using EasyScada.Core;
 using EasyScada.Winforms.Controls;
+using EnvDTE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +18,9 @@ namespace SunAutomation.Controls
 {
     public partial class MonitorPanel : UserControl
     {
-        Dictionary<string, EasyLabel> _tagToLabel = new Dictionary<string, EasyLabel>();
+        DateTime _fromDate, _toDate;
+        Email _email;
+        string _fileName = string.Empty;
 
         public MonitorPanel()
         {
@@ -25,90 +31,177 @@ namespace SunAutomation.Controls
 
         private void MonitorPanel_Load(object sender, EventArgs e)
         {
-            foreach (var tagLabel in FindStatusControl())
-            {
-                if (!string.IsNullOrWhiteSpace(tagLabel.TagPath))
-                {
-                    _tagToLabel[tagLabel.TagPath] = tagLabel;
-                    tagLabel.LinkedTag.QualityChanged += LinkedTag_QualityChanged;
-                }
-                UpdateLabelStatus(tagLabel);
-            }
+            LoadData();
         }
 
-        private void UpdateLabelStatus(EasyLabel easyLabel)
+        void LoadData()
         {
-            var qualityLabel = easyLabel.Tag as Label;
-            if (string.IsNullOrEmpty(easyLabel.TagPath) && easyLabel.LinkedTag == null)
+            try
             {
-                easyLabel.Text = "";
-                qualityLabel.BackColor = Color.DarkGray;
-                qualityLabel.Text = "N/A";
-                qualityLabel.ForeColor = Color.Black;
+                _btnQuery.Click += _btnQuery_Click;
+                _btnSendMail.Click += _btnSendMail_Click;
+
+                _dtFrom.ValueChanged += (s, o) => { _fromDate = _dtFrom.Value; };
+                _dtTo.ValueChanged += (s, o) => { _toDate = _dtTo.Value; };
+
+                _dtFrom.Value = DateTime.Now;
+                _dtTo.Value = DateTime.Now;
             }
-            else
-            {
-                var quality = easyLabel.LinkedTag.Quality;
-                switch (quality)
-                {
-                    case Quality.Uncertain:
-                    case Quality.Bad:
-                        qualityLabel.Text = "ER";
-                        qualityLabel.BackColor = Color.Red;
-                        qualityLabel.ForeColor = Color.White;
-                        break;
-                    case Quality.Good:
-                        qualityLabel.Text = "OK";
-                        qualityLabel.BackColor = Color.Green;
-                        qualityLabel.ForeColor = Color.White;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            catch { }
         }
 
-        private void LinkedTag_QualityChanged(object sender, TagQualityChangedEventArgs e)
+        private void _btnSendMail_Click(object sender, EventArgs e)
         {
-            if (_tagToLabel.ContainsKey(e.Tag.Path))
+            try
             {
-                var tagLabel = _tagToLabel[e.Tag.Path];
-                this.Invoke(new Action(() =>
-                {
-                    UpdateLabelStatus(tagLabel);
-                }));
+                GlobalVariable.EmailCenter.Body = $"Dữ liệu cân từ ngày {_fromDate} đến ngày {_toDate}";
+
+                var result = GlobalVariable.EmailCenter.SendEmail();
+                var mess = result == true ? "thành công" : "không thành công";
+                //Debug.WriteLine($"Send email result: {result}");
+                MessageBox.Show($"Gửi email {mess}", "Thông tin", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            catch { }
         }
 
-        private IEnumerable<EasyLabel> FindStatusControl()
+        private void _btnQuery_Click(object sender, EventArgs e)
         {
-            foreach (var control in Controls)
-            {
-                Control statusControl = null;
-                EasyLabel tagLabel = null;
+            RefreshData();
+        }
 
-                foreach (var child in (control as Control).Controls)
+        void RefreshData()
+        {
+            try
+            {
+                using (var dbContext = new ApplicationDbContext())
                 {
-                    if (child is Control childControl)
+                    var fromDate = _fromDate.ToString("yyyy-MM-dd 00:00:00");
+                    var todateDate = _fromDate.ToString("yyyy-MM-dd 23:59:59");
+
+                    _fromDate = Convert.ToDateTime(fromDate);
+                    _toDate = Convert.ToDateTime(todateDate);
+
+                    var data = dbContext.DataLogs.Where(x => x.CreatedDate >= _fromDate && x.CreatedDate <= _toDate).OrderByDescending(_ => _.CreatedDate).ToList();
+
+                    if (data != null && data.Count > 0)
                     {
-                        if (childControl.Text == "OK")
+                        if (_grData.InvokeRequired)
                         {
-                            statusControl = childControl;
+                            this.Invoke(new Action(() =>
+                            {
+                                _grData.DataSource = data;
+                            }));
                         }
+                        else _grData.DataSource = data;
 
-                        if (childControl is EasyLabel easyLabel)
-                        {
-                            tagLabel = easyLabel;
-                        }
-
-                        if (tagLabel != null && childControl != null)
-                        {
-                            tagLabel.Tag = statusControl;
-                            yield return tagLabel;
-                            break;
-                        }
+                        CreateExcel(data);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Đọc dữ liệu báo cáo lỗi: {ex.Message}.", "LỖI", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        void CreateExcel(List<DataLog> model)
+        {
+            try
+            {
+                // Tạo workbook Excel
+                using (var workbook = new XLWorkbook())
+                {
+                    // Tạo một sheet
+                    var worksheet = workbook.Worksheets.Add("Data");
+
+                    worksheet.Range(1, 1, 1, 5).Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                   .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                   .Font.SetFontSize(15).Font.SetBold(true);
+                    worksheet.Range(2, 1, 2, 5).Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                  .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                   .Font.SetFontSize(12).Font.SetBold(true); ;
+
+                    worksheet.Cell(1, 1).Value = "BÁO CÁO";
+                    worksheet.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.Orange;
+                    worksheet.Cell(2, 1).Value = $"Thời gian:{_fromDate} - {_toDate}";
+
+                    // Thêm tiêu đề cột
+                    worksheet.Cell(4, 1).Value = "Ngày giờ cân";
+                    worksheet.Cell(4, 2).Value = "Code";
+                    worksheet.Cell(4, 3).Value = "Bộ đếm";
+                    worksheet.Cell(4, 4).Value = "Khối lượng (kg)";
+                    worksheet.Cell(4, 5).Value = "Tổng khối lượng (kg)";
+                    //tieu de columns
+                    worksheet.Range(4, 1, 4, 5).SetAutoFilter(true);
+                    worksheet.Range(4, 1, 4, 5).Style.Fill.BackgroundColor = XLColor.LightCyan;
+                    // Định dạng bảng (nếu cần)
+                    worksheet.Range($"A4:E{model.Count + 4}").Style.Border.SetInsideBorder(XLBorderStyleValues.Thin)
+                                          .Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+
+
+                    // Thêm dữ liệu từ model
+                    for (int i = 0; i < model.Count; i++)
+                    {
+                        var data = model[i];
+                        worksheet.Cell(i + 5, 1).Value = data.CreatedDate;
+                        worksheet.Cell(i + 5, 2).Value = data.Code;
+                        worksheet.Cell(i + 5, 3).Value = data.Count;
+                        worksheet.Cell(i + 5, 4).Value = data.Weight;
+                        worksheet.Cell(i + 5, 5).Value = data.TotalWeight;
+                    }
+
+                    //worksheet.Column(1).Width = 40;  // Set cột 1 có độ rộng 15
+                    worksheet.Columns().AdjustToContents();//Adjust Row Height and Column Width to Contents
+
+                    //column name
+                    worksheet.Range($"A4:E4").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                   .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                    .Font.SetFontSize(12).Font.SetBold(true); ;
+
+                    //Data row.
+                    worksheet.Range($"A5:A{model.Count + 4}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left)
+                 .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                 .DateFormat.Format = "yyyy-MM-dd HH:mm:ss";
+
+                    worksheet.Range($"B5:B{model.Count + 4}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left)
+                 .Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+
+                    worksheet.Range($"C5:E{model.Count + 4}").Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right)
+                .Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+
+                    // Lưu file Excel
+                    _fileName = $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}_Data.xlsx";
+                    string filePath = Path.Combine(GlobalVariable.SettingConfig.AttachmentPath, _fileName);
+
+                    //set cho attachmentEmail
+                    GlobalVariable.EmailCenter.AttachmentPath = filePath;
+
+                    workbook.SaveAs(filePath);
+
+                    // Mở file Excel sau khi lưu
+                    OpenExcelFile(filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Xuất excel lỗi: {ex.Message}.", "LỖI", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        // Hàm mở file Excel
+        private static void OpenExcelFile(string filePath)
+        {
+            try
+            {
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                process.StartInfo.FileName = filePath; // Đường dẫn file Excel
+                process.StartInfo.UseShellExecute = true; // Sử dụng ứng dụng mặc định để mở
+                process.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Mở file lỗi: {ex.Message}.", "LỖI", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

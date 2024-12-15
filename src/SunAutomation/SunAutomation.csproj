@@ -91,10 +91,6 @@
     <Reference Include="MySql.Data">
       <HintPath>..\..\Toolkit\MySql.Data.DLL</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Toolkit\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="OxyPlot">
       <HintPath>..\..\Toolkit\OxyPlot.dll</HintPath>
     </Reference>
@@ -126,6 +122,8 @@
     </Reference>
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -141,6 +139,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationDbContext.cs" />
     <Compile Include="Controls\GelButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -159,8 +158,16 @@
     <Compile Include="CurrentTimeControl.Designer.cs">
       <DependentUpon>CurrentTimeControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\MachineModes.cs" />
-    <Compile Include="Models\MachineStatuses.cs" />
+    <Compile Include="Email.cs" />
+    <Compile Include="GlobalVariable.cs" />
+    <Compile Include="Migrations\202412150648384_InitialCreate.cs" />
+    <Compile Include="Migrations\202412150648384_InitialCreate.Designer.cs">
+      <DependentUpon>202412150648384_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\FE\ConfigSetting.cs" />
+    <Compile Include="Models\FE\DataLog.cs" />
+    <Compile Include="Models\SettingsModel.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -183,6 +190,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202412150648384_InitialCreate.resx">
+      <DependentUpon>202412150648384_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -214,8 +224,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="ClosedXML">
+      <Version>0.104.2</Version>
+    </PackageReference>
+    <PackageReference Include="EntityFramework">
+      <Version>6.5.1</Version>
+    </PackageReference>
     <PackageReference Include="envdte">
-      <Version>8.0.0</Version>
+      <Version>17.12.40391</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +272,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

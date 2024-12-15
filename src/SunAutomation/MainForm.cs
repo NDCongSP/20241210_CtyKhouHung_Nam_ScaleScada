@@ -1,5 +1,6 @@
 ﻿using EasyScada.Core;
 using EasyScada.Winforms.Controls;
+using Newtonsoft.Json;
 using SunAutomation.Controls;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,9 @@ namespace SunAutomation
 
         Control _activePanel;
 
+        bool _trigger = false;
+        DataLog _dataLog = new DataLog();
+
         public MainForm()
         {
             InitializeComponent();
@@ -35,7 +39,7 @@ namespace SunAutomation
             Load += MainForm_Load;
 
             _btnMain.Click += _btnMain_Click;
-            _btnMonitor.Click += _btnMonitor_Click;
+            _btnReport.Click += _btnMonitor_Click;
             _btnSetup.Click += _btnSetup_Click;
 
             _easyDriverConnector.Started += _easyDriverConnector_Started;
@@ -43,9 +47,6 @@ namespace SunAutomation
             {
                 _easyDriverConnector_Started(null, null);
             }
-
-
-
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -74,86 +75,112 @@ namespace SunAutomation
 
         private void _easyDriverConnector_Started(object sender, EventArgs e)
         {
-            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Warning_code").ValueChanged += WarningCode_ValueChanged;
-            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Fault_code").ValueChanged += FaultCode_ValueChanged;
-            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/B_status").ValueChanged += BStatus_ValueChanged;
+            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/WEIGHT").ValueChanged += WEIGHT_ValueChanged;
+            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/COUNT").ValueChanged += COUNT_ValueChanged;
+            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/TOTAL_WEIGHT").ValueChanged += TOTAL_WEIGHT_ValueChanged;
+            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/TRIGGER").ValueChanged += TRIGGER_ValueChanged;
+            _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/CODE").ValueChanged += CODE_ValueChanged;
 
-            WarningCode_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Warning_code")
-                    , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Warning_code")
-                    , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Warning_code").Value));
-            FaultCode_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Fault_code")
-                    , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Fault_code")
-                    , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/Fault_code").Value));
-
-            BStatus_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/B_status")
-                    , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/B_status")
-                    , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/B_status").Value));
+            CODE_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/CODE")
+                    , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/CODE")
+                    , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/CODE").Value));
+            WEIGHT_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/WEIGHT")
+                   , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/WEIGHT")
+                   , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/WEIGHT").Value));
+            COUNT_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/COUNT")
+                    , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/COUNT")
+                    , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/COUNT").Value));
+            TOTAL_WEIGHT_ValueChanged(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/TOTAL_WEIGHT")
+                   , new TagValueChangedEventArgs(_easyDriverConnector.GetTag($"Local Station/Channel1/Device1/TOTAL_WEIGHT")
+                   , "", _easyDriverConnector.GetTag($"Local Station/Channel1/Device1/TOTAL_WEIGHT").Value));
         }
 
-        private static void SaveSetLabelText(Label easyLabel, string value)
-        {
-            if (easyLabel.InvokeRequired)
-            {
-                easyLabel.Invoke(new Action(() =>
-                {
-                    easyLabel.Text = value;
-                }));
-            }
-            else
-            {
-                easyLabel.Text = value;
-            }
-        }
-
-        private void BStatus_ValueChanged(object sender, TagValueChangedEventArgs e)
+        private void TOTAL_WEIGHT_ValueChanged(object sender, TagValueChangedEventArgs e)
         {
             try
             {
-                if (e.NewValue == "1")
-                {
-                    SaveSetLabelText(_labRunningStop, "Checking");
-                }
-                else if (e.NewValue == "2")
-                {
-                    SaveSetLabelText(_labRunningStop, "Ready");
-                }
-                else if (e.NewValue == "4")
-                {
-                    SaveSetLabelText(_labRunningStop, "Starting");
-                }
-                else if (e.NewValue == "8")
-                {
-                    SaveSetLabelText(_labRunningStop, "Operating");
-                }
-                else if (e.NewValue == "16")
-                {
-                    SaveSetLabelText(_labRunningStop, "Stopping");
-                }
-                else if (e.NewValue == "32")
-                {
-                    SaveSetLabelText(_labRunningStop, "Fault");
-                }
-                else if (e.NewValue == "64")
-                {
-                    SaveSetLabelText(_labRunningStop, "Reset");
-                }
-                else if (e.NewValue == "128")
-                {
-                    SaveSetLabelText(_labRunningStop, "Emergency Stop");
-                }
-                else
-                {
-                    SaveSetLabelText(_labRunningStop, "Stop");
-                }
+                _dataLog.TotalWeight = double.TryParse(e.NewValue, out double value) ? Math.Round(value / 100, 2) : 0;
 
-                //if (e.NewValue == "18138")
-                //{
-                //    SaveSetLabelText(_labRunningStop, "Stop");
-                //}
-                //else
-                //{
-                //    SaveSetLabelText(_labRunningStop, "Running");
-                //}
+                if (_labTotalWeight.InvokeRequired)
+                {
+                    _labTotalWeight.Invoke(new Action(() => {
+                        _labTotalWeight.Text = _dataLog.TotalWeight.ToString();
+                    }));
+                }
+                else _labTotalWeight.Text = _dataLog.TotalWeight.ToString();
+            }
+            catch { }
+        }
+
+        private void COUNT_ValueChanged(object sender, TagValueChangedEventArgs e)
+        {
+            try
+            {
+                _dataLog.Count = int.TryParse(e.NewValue, out int value) ? value : 0;
+
+                if (_labCount.InvokeRequired)
+                {
+                    _labCount.Invoke(new Action(() => {
+                        _labCount.Text = _dataLog.Count.ToString();
+                    }));
+                }
+                else _labCount.Text = _dataLog.Count.ToString();
+            }
+            catch { }
+        }
+
+        private void WEIGHT_ValueChanged(object sender, TagValueChangedEventArgs e)
+        {
+            try
+            {
+                _dataLog.Weight = double.TryParse(e.NewValue, out double value) ? Math.Round(value / 100, 2) : 0;
+
+                if (_labWeight.InvokeRequired)
+                {
+                    _labWeight.Invoke(new Action(() => {
+                        _labWeight.Text = _dataLog.Weight.ToString();
+                    }));
+                }
+                else _labWeight.Text = _dataLog.Weight.ToString();
+            }
+            catch { }
+        }
+
+        private void TRIGGER_ValueChanged(object sender, TagValueChangedEventArgs e)
+        {
+            try
+            {
+                _trigger = e.NewValue == "1" ? true : false;
+
+                if (_trigger)
+                {
+                    using (var dbContext = new ApplicationDbContext())
+                    {
+                        _dataLog.Id = Guid.NewGuid();
+                        _dataLog.CreatedDate = DateTime.Now;
+
+                        dbContext.DataLogs.Add(_dataLog);
+                        dbContext.SaveChanges();
+                    }
+                    _easyDriverConnector.GetTag("Local Station/Channel1/Device1/SAVE_DONE").WriteAsync("1", WritePiority.High);
+                }
+            }
+            catch { }
+        }
+
+        private void CODE_ValueChanged(object sender, TagValueChangedEventArgs e)
+        {
+            try
+            {
+                _dataLog.Code = e.NewValue;
+
+                  if (_labCode.InvokeRequired)
+                {
+                    _labCode.Invoke(new Action(() => {
+                        _labCode.Text = _dataLog.Code.ToString();
+                    }));
+                }
+                else _labCode.Text = _dataLog.Code.ToString();
             }
             catch { }
         }
@@ -164,97 +191,18 @@ namespace SunAutomation
             {
                 this.Invoke(new Action(() =>
                 {
-                    _lbConnectionStatus.Text = e.NewStatus.ToString();
-                    _lbConnectionStatus.ForeColor = GetConnectionStatusColor(e.NewStatus);
+                    _lbStatus.Text = e.NewStatus.ToString();
+                    _lbStatus.ForeColor = GetConnectionStatusColor(e.NewStatus);
                     _lbStatus.Text = _easyDriverConnector.ConnectionStatus.ToString();
                 }));
             }
             else
             {
-                _lbConnectionStatus.Text = e.NewStatus.ToString();
-                _lbConnectionStatus.ForeColor = GetConnectionStatusColor(e.NewStatus);
+                _lbStatus.Text = e.NewStatus.ToString();
+                _lbStatus.ForeColor = GetConnectionStatusColor(e.NewStatus);
                 _lbStatus.Text = _easyDriverConnector.ConnectionStatus.ToString();
 
             }
-        }
-
-        private void WarningCode_ValueChanged(object sender, TagValueChangedEventArgs e)
-        {
-            try
-            {
-                if (e.NewValue == "0")
-                {
-                    if (_labWarningCode.InvokeRequired)
-                    {
-                        _labWarningCode.Invoke(new Action(() =>
-                        {
-                            _labWarningCode.BackColor = Color.White;
-                            _labWarningCode.Text = $"Warning Code = {e.NewValue}";
-                        }));
-                    }
-                    else
-                    {
-                        _labWarningCode.BackColor = Color.White;
-                        _labWarningCode.Text = $"Warning Code = {e.NewValue}";
-                    }
-                }
-                else
-                {
-                    if (_labWarningCode.InvokeRequired)
-                    {
-                        _labWarningCode.Invoke(new Action(() =>
-                        {
-                            _labWarningCode.BackColor = Color.Yellow;
-                            _labWarningCode.Text = $"Warning Code = {e.NewValue}";
-                        }));
-                    }
-                    else
-                    {
-                        _labWarningCode.BackColor = Color.Yellow;
-                        _labWarningCode.Text = $"Warning Code = {e.NewValue}";
-                    }
-                }
-            }
-            catch { }
-        }
-        private void FaultCode_ValueChanged(object sender, TagValueChangedEventArgs e)
-        {
-            try
-            {
-                if (e.NewValue == "0")
-                {
-                    if (_labFaultCode.InvokeRequired)
-                    {
-                        _labFaultCode.Invoke(new Action(() =>
-                        {
-                            _labFaultCode.BackColor = Color.White;
-                            _labFaultCode.Text = $"Fault Code = {e.NewValue}";
-                        }));
-                    }
-                    else
-                    {
-                        _labFaultCode.BackColor = Color.White;
-                        _labFaultCode.Text = $"Fault Code = {e.NewValue}";
-                    }
-                }
-                else
-                {
-                    if (_labFaultCode.InvokeRequired)
-                    {
-                        _labFaultCode.Invoke(new Action(() =>
-                        {
-                            _labFaultCode.BackColor = Color.Yellow;
-                            _labFaultCode.Text = $"Fault Code = {e.NewValue}";
-                        }));
-                    }
-                    else
-                    {
-                        _labFaultCode.BackColor = Color.Yellow;
-                        _labFaultCode.Text = $"Fault Code = {e.NewValue}";
-                    }
-                }
-            }
-            catch { }
         }
 
         private Color GetConnectionStatusColor(ConnectionStatus status)
@@ -275,12 +223,6 @@ namespace SunAutomation
 
         private void _btnMonitor_Click(object sender, EventArgs e)
         {
-            if (_easyDriverConnector.ConnectionStatus != ConnectionStatus.Connected)
-            {
-                MessageBox.Show("Mất kết nối với server", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
             ShowPanel(_monitorPanel);
         }
 
@@ -295,18 +237,35 @@ namespace SunAutomation
 
         private void _btnSetup_Click(object sender, EventArgs e)
         {
-            if (_easyDriverConnector.ConnectionStatus != ConnectionStatus.Connected)
-            {
-                MessageBox.Show("Mất kết nối với server", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
             ShowPanel(_setingsPanel);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             var serverAddress = _easyDriverConnector.ServerAddress;
+
+            using (var dbContext = new ApplicationDbContext())
+            {
+                var data = dbContext.ConfigSettings.ToList();
+
+                if (data != null && data.Count > 0)
+                {
+                    GlobalVariable.MyConfig = data.FirstOrDefault();
+
+                    GlobalVariable.SettingConfig = JsonConvert.DeserializeObject<SettingsModel>(GlobalVariable.MyConfig.ConfingModel);
+                }
+                else
+                {
+                    GlobalVariable.MyConfig.Id = Guid.NewGuid();
+                }
+            }
+
+            GlobalVariable.EmailCenter.SenderEmail = GlobalVariable.SettingConfig.SenderEmail;
+            GlobalVariable.EmailCenter.SenderPassword = GlobalVariable.SettingConfig.SenderPassword;
+            GlobalVariable.EmailCenter.RecipientEmail = GlobalVariable.SettingConfig.RecipientEmail;
+            //GlobalVariable.EmailCenter.Port = 587;
+            GlobalVariable.EmailCenter.Subject = GlobalVariable.SettingConfig.EmailSubject;
+
             RefreshDateTime();
             timer1.Tick += timer1_Tick;
             timer1.Start();
@@ -339,155 +298,6 @@ namespace SunAutomation
             panel.Visible = true;
             _activePanel = panel;
             panel.BringToFront();
-        }
-
-        private bool _isBusy = false;
-
-        private async void _btnStart_Click(object sender, EventArgs e)
-        {
-            if (_isBusy) return;
-
-            _isBusy = true;
-            try
-            {
-                if (_easyDriverConnector.ConnectionStatus != ConnectionStatus.Connected)
-                {
-                    MessageBox.Show("Mất kết nối với server", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                var tag = _easyDriverConnector.GetTag("Local Station/Channel1/Device1/Start_stop");
-                if (tag == null)
-                {
-                    MessageBox.Show("Không tìm thấy tag Start_stop", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                await tag.WriteAsync("1234");
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi không ghi được lệnh Start. {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                _isBusy = false;
-            }
-
-        }
-
-        private async void _btnStop_Click(object sender, EventArgs e)
-        {
-            if (_isBusy) return;
-
-            _isBusy = true;
-            try
-            {
-                if (_easyDriverConnector.ConnectionStatus != ConnectionStatus.Connected)
-                {
-                    MessageBox.Show("Mất kết nối với server", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                var tag = _easyDriverConnector.GetTag("Local Station/Channel1/Device1/Start_stop");
-                if (tag == null)
-                {
-                    MessageBox.Show("Không tìm thấy tag Start_stop", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                await tag.WriteAsync("4321");
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi không ghi được lệnh Start. {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                _isBusy = false;
-            }
-        }
-
-        private async void _btnInc1_Click(object sender, EventArgs e)
-        {
-            if (_isBusy) return;
-
-            _isBusy = true;
-            try
-            {
-                if (_easyDriverConnector.ConnectionStatus != ConnectionStatus.Connected)
-                {
-                    MessageBox.Show("Mất kết nối với server", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                var tag = _easyDriverConnector.GetTag("Local Station/Channel1/Device1/Target");
-                if (tag == null)
-                {
-                    MessageBox.Show("Không tìm thấy tag Target", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                if (!double.TryParse(tag.Value, out double targetValue))
-                {
-                    MessageBox.Show("Target không có giá trị", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                targetValue++;
-
-                await tag.WriteAsync($"{targetValue}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi không ghi được lệnh Start. {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                _isBusy = false;
-            }
-        }
-
-        private async void _btnDec1_Click(object sender, EventArgs e)
-        {
-            if (_isBusy) return;
-
-            _isBusy = true;
-            try
-            {
-                if (_easyDriverConnector.ConnectionStatus != ConnectionStatus.Connected)
-                {
-                    MessageBox.Show("Mất kết nối với server", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                var tag = _easyDriverConnector.GetTag("Local Station/Channel1/Device1/Target");
-                if (tag == null)
-                {
-                    MessageBox.Show("Không tìm thấy tag Target", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                if (!double.TryParse(tag.Value, out double targetValue))
-                {
-                    MessageBox.Show("Target không có giá trị", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                targetValue--;
-
-                await tag.WriteAsync($"{targetValue}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi không ghi được lệnh Start. {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                _isBusy = false;
-            }
         }
     }
 }
