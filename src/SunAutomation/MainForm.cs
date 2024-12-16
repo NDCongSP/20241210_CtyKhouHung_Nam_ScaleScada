@@ -1,5 +1,6 @@
 ﻿using EasyScada.Core;
 using EasyScada.Winforms.Controls;
+using EnvDTE80;
 using Newtonsoft.Json;
 using SunAutomation.Controls;
 using System;
@@ -45,10 +46,13 @@ namespace SunAutomation
             _btnReport.Click += _btnMonitor_Click;
             _btnSetup.Click += _btnSetup_Click;
 
-            _easyDriverConnector.Started += _easyDriverConnector_Started;
-            if (_easyDriverConnector.IsStarted)
+            if (GlobalVariable.SettingConfig.IsServer == true)
             {
-                _easyDriverConnector_Started(null, null);
+                _easyDriverConnector.Started += _easyDriverConnector_Started;
+                if (_easyDriverConnector.IsStarted)
+                {
+                    _easyDriverConnector_Started(null, null);
+                }
             }
 
             _startTime = DateTime.Now;
@@ -61,12 +65,15 @@ namespace SunAutomation
             {
                 RefreshDateTime();
 
-                var totalTime = (DateTime.Now - _startTime).TotalSeconds;
-                if (totalTime > GlobalVariable.SettingConfig.CheckConnectInterval)
+                if (GlobalVariable.SettingConfig.IsServer)
                 {
-                    _countConnect = _countConnect <= 1000 ? _countConnect += 1 : 1;
-                    _easyDriverConnector.GetTag("Local Station/Channel1/Device1/CHECK_CONNECT").WriteAsync(_countConnect.ToString(), WritePiority.High);
-                    _startTime = DateTime.Now;
+                    var totalTime = (DateTime.Now - _startTime).TotalSeconds;
+                    if (totalTime > GlobalVariable.SettingConfig.CheckConnectInterval)
+                    {
+                        _countConnect = _countConnect <= 1000 ? _countConnect += 1 : 1;
+                        _easyDriverConnector.GetTag("Local Station/Channel1/Device1/CHECK_CONNECT").WriteAsync(_countConnect.ToString(), WritePiority.High);
+                        _startTime = DateTime.Now;
+                    }
                 }
             }
             catch { }
@@ -264,8 +271,6 @@ namespace SunAutomation
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            var serverAddress = _easyDriverConnector.ServerAddress;
-
             using (var dbContext = new ApplicationDbContext())
             {
                 var data = dbContext.ConfigSettings.ToList();
@@ -280,13 +285,25 @@ namespace SunAutomation
                 {
                     GlobalVariable.MyConfig.Id = Guid.NewGuid();
                 }
+
+                GlobalVariable.EmailCenter.SenderEmail = GlobalVariable.SettingConfig.SenderEmail;
+                GlobalVariable.EmailCenter.SenderPassword = GlobalVariable.SettingConfig.SenderPassword;
+                GlobalVariable.EmailCenter.RecipientEmail = GlobalVariable.SettingConfig.RecipientEmail;
+                //GlobalVariable.EmailCenter.Port = 587;
+                GlobalVariable.EmailCenter.Subject = GlobalVariable.SettingConfig.EmailSubject;
             }
 
-            GlobalVariable.EmailCenter.SenderEmail = GlobalVariable.SettingConfig.SenderEmail;
-            GlobalVariable.EmailCenter.SenderPassword = GlobalVariable.SettingConfig.SenderPassword;
-            GlobalVariable.EmailCenter.RecipientEmail = GlobalVariable.SettingConfig.RecipientEmail;
-            //GlobalVariable.EmailCenter.Port = 587;
-            GlobalVariable.EmailCenter.Subject = GlobalVariable.SettingConfig.EmailSubject;
+            if (GlobalVariable.SettingConfig.IsServer)
+            {
+                var serverAddress = _easyDriverConnector.ServerAddress;
+            }
+            else
+            {
+                _monitorPanel = new MonitorPanel();
+                ShowPanel(_monitorPanel);
+
+                _btnMain.Visible=false;
+            }
 
             RefreshDateTime();
             timer1.Tick += timer1_Tick;
